@@ -55,18 +55,10 @@ class JWTAuth(BasicAuth):
         return g.get(AUTHEN_ROLES, [])
 
     def authorized(self, allowed_roles, resource, method):
-        authorized = False
-
-        if request.authorization:
-            auth = request.authorization
-            authorized = self.check_auth(auth.username, auth.password,
-                                         allowed_roles, resource, method)
-        else:
-            try:
-                access_token = request.args['access_token']
-            except KeyError:
-                access_token = request.headers.get('Authorization', '').partition(' ')[2]
-            authorized = self.check_token(access_token, allowed_roles, resource, method)
+        access_token = request.args.get('access_token')
+        if not access_token:
+            access_token = request.headers.get('Authorization', '').partition(' ')[2]
+        authorized = self.check_token(access_token, allowed_roles, resource, method)
 
         return authorized
 
